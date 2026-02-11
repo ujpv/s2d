@@ -1,8 +1,6 @@
-import sun.java2d.metal.MTLGraphics2D
 import java.awt.*
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
-import java.awt.image.VolatileImage
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.RepaintManager
@@ -49,13 +47,8 @@ object SkiaTextureDemo {
             g2.font = Font("SansSerif", Font.PLAIN, 24)
             g2.drawString("The text is rendered via Java2D(before skia)", 18, 36)
 
-            val ok = withSkiaCanvas(g2, width, height) { canvas, _, scale ->
+            withSkiaCanvas(g2, width, height) { canvas, _, scale ->
                 drawSkiaDemo(canvas, width, height, scale)
-            }
-            if (!ok) {
-                g2.color = Color.RED
-                g2.font = Font("SansSerif", Font.PLAIN, 14)
-                g2.drawString("MTLGraphics2D.runExternal failed (not a Metal surface)", 18, 52)
             }
 
             g2.color = Color.WHITE
@@ -69,8 +62,8 @@ object SkiaTextureDemo {
         width: Int,
         height: Int,
         block: (org.jetbrains.skia.Canvas, org.jetbrains.skia.DirectContext, Float) -> Unit
-    ): Boolean {
-        return MTLGraphics2D.runExternal(g2d, object : RenderingTask {
+    ) {
+        g2d.runExternal(object : RenderingTask {
             override fun run(surfaceType: String?, pointers: List<Long>, names: List<String?>) {
                 val device = pointers[RenderingTask.MTL_DEVICE_ARG_INDEX]
                 val queue = pointers[RenderingTask.MTL_COMMAND_QUEUE_ARG_INDEX]
